@@ -1,3 +1,4 @@
+import { IMailProvider } from './../../providers/IMailProvider';
 import { ICreateUserRequestDTO } from './CreateUserDTO';
 import { IUsersRepository } from './../../repositories/IUsersRepository';
 import { User } from '../../entities/user';
@@ -5,7 +6,8 @@ import { User } from '../../entities/user';
 export class CreateUserUseCase {
 
     constructor(
-        private usersRepository: IUsersRepository
+        private usersRepository: IUsersRepository,
+        private mailProvider: IMailProvider
     ) {}
     
     async execute(data: ICreateUserRequestDTO) {
@@ -18,5 +20,18 @@ export class CreateUserUseCase {
         const user = new User(data);
 
         await this.usersRepository.save(user)
+
+        this.mailProvider.sendMail({
+            to: {
+                name: data.name,
+                email: data.email,
+            },
+            from: {
+                name: 'Equipe de desenvolvimento',
+                email: 'equipedev@meuapp.com',
+            },
+            subject: 'Seja bem-vindo à plataforma',
+            body: '<p>Você já pode fazer login em nossa palataforma<p>'
+        })
     }
 }
